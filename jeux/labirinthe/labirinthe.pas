@@ -72,16 +72,19 @@ var
   X, Y: Integer;
   i, j: Integer;
   Carte: TCarte;
-  compteur: Integer;
-
+  Compteur: Integer;
+  Chaine: string;
 begin
   LitCarte(Carte, Fichier);
   SetColor(GetMaxColor);
   i := 1;
   j := 1;
   compteur:= 0;
+  Str(Compteur, Chaine);
   repeat
    ClearViewPort;
+   SetTextStyle(DefaultFont, HorizDir, 1);
+   OutTextXY(500, 50, 'Nombre de pas ' + Chaine);
    AfficheCarte(carte);
    X := j * TailleCase + TailleCase div 2;
    Y := i * TailleCase + TailleCase div 2;
@@ -93,6 +96,7 @@ begin
    if Key = #0 then begin
      Key := ReadKey;
      compteur := compteur + 1;
+     Str(Compteur, Chaine);
      case Key of
      #75: begin
       if (j > 1) and (Carte[i, j - 1] = 0) then begin
@@ -116,15 +120,12 @@ begin
      end;
     end;
    end;
-  ChangeCouleur(0, 127, 0);
-  Circle(20, 25, 10);
   until Key = #27;
   ChangeCouleur(127, 0, 0);
   Circle(200, 200, 150);
   ChangeCouleur(0, 127, 0);
   SetTextStyle(DefaultFont, HorizDir, 10);
   OutText('Bravo');
-  WriteLn(compteur);
   ReadKey;
 end;
 
