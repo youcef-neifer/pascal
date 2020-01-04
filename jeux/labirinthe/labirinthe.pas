@@ -66,7 +66,7 @@ begin
   end;
 end;
 
-procedure Niveau(var Fichier: Text);
+procedure Niveau(n: Integer);
 var
   Key: Char;
   X, Y: Integer;
@@ -74,8 +74,19 @@ var
   Carte: TCarte;
   Compteur: Integer;
   Chaine: string;
+  NumCarte: string;
+  NomCarte: string;
+  Fichier: Text;
 begin
+  Str(n, NumCarte);
+  NomCarte := 'cartes/carte' + NumCarte + '.txt';
+  Assign(Fichier, NomCarte);
+  {$IOChecks off}Reset(Fichier);{$IOChecks on}
+  if IOResult <> 0 then begin
+    Exit;
+  end;
   LitCarte(Carte, Fichier);
+  Close(Fichier);
   SetColor(GetMaxColor);
   i := 1;
   j := 1;
@@ -83,6 +94,8 @@ begin
   Str(Compteur, Chaine);
   repeat
    ClearViewPort;
+   SetTextStyle(DefaultFont, HorizDir, 2);
+   OutTextXY(500, 25, 'Niveau ' + NumCarte);
    SetTextStyle(DefaultFont, HorizDir, 1);
    OutTextXY(500, 50, 'Nombre de pas ' + Chaine);
    AfficheCarte(carte);
@@ -131,8 +144,6 @@ end;
 
 var
   n: Integer;
-  NomCarte: string;
-  Fichier: Text;
   Repertoire: string;
 
 begin
@@ -148,14 +159,7 @@ begin
   InitGraph(GraphDriver, GraphMode, PathToDriver);
   {Pour chaque niveau lancer le jeux}
   for n := 1 to NombreCartes do begin
-    Str(n, NomCarte);
-    NomCarte := 'cartes/carte' + NomCarte + '.txt';
-    Assign(Fichier, NomCarte);
-    {$IOChecks off}Reset(Fichier);{$IOChecks on}
-    if IOResult = 0 then begin
-      Niveau(Fichier);
-      Close(Fichier);
-    end;
+    Niveau(n);
   end;
   {Attendre que l'utilisateur appuie sur la touche Esc}
   while (ReadKey <> #27) do begin
