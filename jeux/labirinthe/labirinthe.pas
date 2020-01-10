@@ -81,6 +81,9 @@ var
   NomCarte: string;
   Fichier: Text;
   t: TDateTime;
+  t0: TDateTime;
+  TempEcoule: Integer;
+  TempEcoulePrecedent: Integer;
 begin
   Str(n, NumCarte);
   NomCarte := 'cartes/carte' + NumCarte + '.txt';
@@ -96,6 +99,8 @@ begin
   j := 1;
   compteur:= 0;
   Str(Compteur, Chaine);
+  t0 := Now;
+  TempEcoulePrecedent := 0;
   repeat
    ClearViewPort;
    SetTextStyle(DefaultFont, HorizDir, 2);
@@ -112,8 +117,14 @@ begin
    SetFillStyle(EmptyFill, Couleur(0, 0, 0));
    repeat
      t := Now;
-     Bar(300, 0, 450, 20);
-     OutTextXY(300, 10, DateTimeToStr(t));
+     TempEcoule := Round(24 * 3600 * (t - t0));
+     if TempEcoule <> TempEcoulePrecedent then begin
+       Bar(300, 0, 600, 20);
+       Str(TempEcoule, Chaine);
+       Chaine := DateTimeToStr(t) + ' Votre temps ' + Chaine + 's';
+       OutTextXY(300, 10, Chaine);
+       TempEcoulePrecedent := TempEcoule;
+     end;
      Sleep(1);
    until KeyPressed;
    SetFillStyle(SolidFill, Couleur(127, 127, 127));
