@@ -14,8 +14,6 @@ const
   reponse4 = 'Au collège Paul Fort plus précisément en 6e Mercure puis modifier en 5e Franquin.';
   question5 = 'Vous servez à quoi ?';
   reponse5 = 'Je sert à répondre à vos question.';
-  question6 = 'Quel est l''info du jour ?';
-  reponse6 = 'L''info du jour est que les 6eme Mercure ont fait une grave bêtise hier en voulant tester un prof pour savoir s''il était raciste des personnes blanc,noir ou arabe mais quelqu''un qui s''appelle clementine a dénoncé ce qu''il avait fait donc le professeur a dit à Mme Moison qui a dit à Mre Laïb qui a dit à Mme Sostène celle qui dirige le collège.Ce jour là,c''était le 17 janvier 2019.Ils sont venus aujourd''hui et nous a enguelé puis Mme Sostène a dit:"Celui qui a eu cette idée qu''il se dénonce quelqu''un c''est dénoncé et a dit qu''elle était pas seul.';
   question7 = 'Où il habitait ?';
   reponse7 = 'A courcourronne 18 Avenue René Descartes';
   question8 = 'Dans quelle pays et dans quelle continent ?';
@@ -95,9 +93,6 @@ begin
     end;
     if question = SupprimeEspaces(question5) then begin
        reponse := reponse5;
-    end;
-    if question = SupprimeEspaces(question6) then begin
-       reponse := reponse6;
     end;
     if question = SupprimeEspaces(question7) then begin
        reponse := reponse7;
