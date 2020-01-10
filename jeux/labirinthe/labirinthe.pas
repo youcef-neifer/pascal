@@ -1,7 +1,7 @@
 program Labirinthe;
 
 uses
- ptcGraph, ptcCrt, ptc;
+ ptcGraph, ptcCrt, ptc, sysutils;
 
 const
   NombreCases = 20;
@@ -24,15 +24,18 @@ begin
    Min := y;
  end;
 end;
-procedure ChangeCouleur(R, G, B: Byte);
-var
-  Color: Word;
+
+function Couleur(R, G, B: Byte): Word;
 begin
  R := Min(R, (1 shl 5) - 1);
  G := Min(G, (1 shl 6) - 1);
  B := Min(B, (1 shl 5) - 1);
- Color := (R shl 11) + (G shl 5) + B;
- SetColor(Color);
+ Couleur := (R shl 11) + (G shl 5) + B;
+end;
+
+procedure ChangeCouleur(R, G, B: Byte);
+begin
+ SetColor(Couleur(R, G, B));
 end;
 
 procedure AfficheCarte(carte: TCarte);
@@ -77,6 +80,7 @@ var
   NumCarte: string;
   NomCarte: string;
   Fichier: Text;
+  t: TDateTime;
 begin
   Str(n, NumCarte);
   NomCarte := 'cartes/carte' + NumCarte + '.txt';
@@ -105,6 +109,14 @@ begin
    if (i = NombreCases) and (j = NombreCases) then begin
       Break;
    end;
+   SetFillStyle(EmptyFill, Couleur(0, 0, 0));
+   repeat
+     t := Now;
+     Bar(300, 0, 450, 20);
+     OutTextXY(300, 10, DateTimeToStr(t));
+     Sleep(1);
+   until KeyPressed;
+   SetFillStyle(SolidFill, Couleur(127, 127, 127));
    Key := ReadKey;
    if Key = #0 then begin
      Key := ReadKey;
