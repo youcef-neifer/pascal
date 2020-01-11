@@ -1,7 +1,7 @@
 program Labirinthe;
 
 uses
- ptcGraph, ptcCrt, ptc, sysutils;
+ ptcGraph, ptcCrt, sysutils;
 
 const
   NombreCases = 20;
@@ -100,8 +100,8 @@ begin
   compteur:= 0;
   Str(Compteur, Chaine);
   t0 := Now;
-  TempEcoulePrecedent := 0;
   repeat
+   TempEcoulePrecedent := 0;
    ClearViewPort;
    SetTextStyle(DefaultFont, HorizDir, 2);
    OutTextXY(500, 25, 'Niveau ' + NumCarte);
