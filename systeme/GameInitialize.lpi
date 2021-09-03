@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="11"/>
+    <General>
+      <Flags>
+        <MainUnitHasCreateFormStatements Value="False"/>
+        <MainUnitHasTitleStatement Value="False"/>
+        <MainUnitHasScaledStatement Value="False"/>
+      </Flags>
+      <SessionStorage Value="InProjectDir"/>
+      <MainUnit Value="0"/>
+      <Title Value="GameInitialize"/>
+      <UseAppBundle Value="False"/>
+      <ResourceType Value="res"/>
+    </General>
+    <BuildModes Count="1">
+      <Item1 Name="Default" Default="True"/>
+    </BuildModes>
+    <PublishOptions>
+      <Version Value="2"/>
+      <UseFileFilters Value="True"/>
+    </PublishOptions>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes Count="0"/>
+    </RunParams>
+    <Units Count="11">
+      <Unit0>
+        <Filename Value="GameInitialize.lpr"/>
+        <IsPartOfProject Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="unit1.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Unit1"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="unit2.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Unit2"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="unit3.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Unit3"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="graphic/imagingdevampireyoucef.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ImagingDeVampireYoucef"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="event.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Event"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="drawrect.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="DrawRect"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="mathdeyoucef.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MathDeYoucef"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="testcamera.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TestCamera"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="load3dobject.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Load3DObject"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="animation.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Animation"/>
+      </Unit10>
+    </Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <Target>
+      <Filename Value="GameInitialize"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir)"/>
+      <OtherUnitFiles Value="graphic"/>
+      <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+    </SearchPaths>
+  </CompilerOptions>
+  <Debugging>
+    <Exceptions Count="5">
+      <Item1>
+        <Name Value="EAbort"/>
+      </Item1>
+      <Item2>
+        <Name Value="ECodetoolError"/>
+      </Item2>
+      <Item3>
+        <Name Value="EFOpenError"/>
+      </Item3>
+      <Item4>
+        <Name Value="Exception"/>
+      </Item4>
+      <Item5>
+        <Name Value="RunError(211)"/>
+      </Item5>
+    </Exceptions>
+  </Debugging>
+</CONFIG>
