@@ -11,24 +11,25 @@
     </CompilerOptions>
     <Files Count="5">
       <Item1>
-        <Filename Value="unit3.pas"/>
-        <UnitName Value="Unit3"/>
+        <Filename Value="unit2.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="Unit2"/>
       </Item1>
       <Item2>
-        <Filename Value="unit2.pas"/>
-        <UnitName Value="Unit2"/>
-      </Item2>
-      <Item3>
         <Filename Value="unit1.pas"/>
         <UnitName Value="Unit1"/>
-      </Item3>
-      <Item4>
+      </Item2>
+      <Item3>
         <Filename Value="drawrect.pas"/>
         <UnitName Value="DrawRect"/>
-      </Item4>
-      <Item5>
+      </Item3>
+      <Item4>
         <Filename Value="event.pas"/>
         <UnitName Value="Event"/>
+      </Item4>
+      <Item5>
+        <Filename Value="mathdeyoucef.pas"/>
+        <UnitName Value="MathDeYoucef"/>
       </Item5>
     </Files>
     <RequiredPkgs Count="1">
