@@ -28,7 +28,7 @@ procedure FaireTriangleOpenGl(nbvertice, nbnormal,
   nbtexture, nbvertice2, nbnormal2, nbtexture2, nbvertice3, nbnormal3, nbtexture3: Integer);
 procedure Init;
 procedure GetNameFile;
-procedure LoadObject3DFile(NomFichier: String);
+function LoadObject3DFile(NomFichier: String): GLenum;
 procedure Destroy3DObject(List: LongWord; rang: Integer);
 implementation
 
@@ -68,12 +68,12 @@ begin
     WriteLn(NomCompletFichier);
 end;
 
-procedure LoadObject3DFile(NomFichier: String);
+function LoadObject3DFile(NomFichier: String): GLuint;
 var
   line: TStringArray;
   Fichier: Text;
   buf: String;
-  coord, coord2, coord3: array[1..100] of String;
+  coord, coord2, coord3: TStringArray;
   compteurtexture, compteurnormal, compteurvertex, compteurface: Integer;
 begin
   compteurtexture := 0;
@@ -122,6 +122,7 @@ begin
     glEndList;
     estdefinie := True;
     Close(Fichier);
+    Result := Ord(LIST_OBJECT);
 end;
 
 procedure Destroy3DObject(List: LongWord; rang: Integer);

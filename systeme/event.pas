@@ -47,6 +47,10 @@ begin
     Self.IsComponent := True;
     Self.IsForm := False;
   end;
+  if Name.Contains('TButton') then begin
+    Self.IsComponent := True;
+    Self.IsForm := False;
+  end;
 end;
 
 procedure TEventListener.SetAction(Event: TEvent);
