@@ -57,10 +57,14 @@ var
   i, n: Integer;
   ARect: TRect;
   params, lines: array of String;
+  alive: array[1..50] of Boolean;
 begin
   Data := 'REFRESH';
   if Client.CanWrite(6000) then begin
     Client.Write(Data[1], Length(Data));
+  end;
+  for i := Low(alive) to High(alive) do begin
+    alive[i] := False;
   end;
   if Client.CanRead(6000) then begin
       DataSize := Client.Waiting;
@@ -73,6 +77,7 @@ begin
         case params[0] of
           'PLAYER':begin
             UpdatePlayer(Params, n);
+            alive[n] := True;
           end;
           'MIETTE':begin
             n := StrToInt(Params[1]);
@@ -82,6 +87,17 @@ begin
           end;
         end;
       end;
+  end;
+  for i := Low(alive) to High(alive) do begin
+    if Assigned(Players[i]) and not alive[i] then begin
+      Players[i].Free;
+      Players[i] := nil;
+      if i = MyIndex then begin
+        IdleTimer1.Enabled := False;
+        Application.Terminate;
+        Exit;
+      end;
+    end;
   end;
   with MyPlayer, Mouse do begin
     if Position.X > X then move(-1 - (Position.X - X) div Taille, 0);

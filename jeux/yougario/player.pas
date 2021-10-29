@@ -172,23 +172,20 @@ begin
     Exit;
   end;
   if FTaille < Player.FTaille then begin
-    if Player is TPlayer then with Player as TPlayer do begin
-      Mange(Self);
-    end;
-  end else begin
-    if distance(Player) < (Taille + Player.Taille) div 2 then begin
-      FTaille := Sqrt(FTaille ** 2 + Player.FTaille ** 2);
-      Player.Free;
-      Result := True;
-    end else if Boule.NB > 1 then begin
-       for i := 2 to Boule.NB do begin
-         if distance(Boule.X[i], Boule.Y[i], Player) < (Taille + Player.Taille) div 2 then begin
-            FBoule.ATaille[i] := Sqrt(Boule.ATaille[i] ** 2 + Player.FTaille ** 2);
-            Player.Free;
-            Result := True;
-            Exit;
-         end;
-      end;
+    Exit;
+  end;
+  if distance(Player) < (Taille + Player.Taille) div 2 then begin
+    FTaille := Sqrt(FTaille ** 2 + Player.FTaille ** 2);
+    Player.Free;
+    Result := True;
+  end else if Boule.NB > 1 then begin
+     for i := 2 to Boule.NB do begin
+       if distance(Boule.X[i], Boule.Y[i], Player) < (Taille + Player.Taille) div 2 then begin
+          FBoule.ATaille[i] := Sqrt(Boule.ATaille[i] ** 2 + Player.FTaille ** 2);
+          Player.Free;
+          Result := True;
+          Exit;
+       end;
     end;
   end;
 end;
