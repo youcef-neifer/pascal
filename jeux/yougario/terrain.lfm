@@ -1,0 +1,34 @@
+object Form1: TForm1
+  Left = 426
+  Height = 765
+  Top = 165
+  Width = 902
+  Caption = 'Form1'
+  ClientHeight = 765
+  ClientWidth = 902
+  OnClose = StopGame
+  OnCreate = StartGame
+  OnKeyPress = FormKeyPress
+  LCLVersion = '2.0.12.0'
+  object PaintBox1: TPaintBox
+    Left = 0
+    Height = 765
+    Top = 0
+    Width = 902
+    Align = alClient
+    OnMouseMove = MouseMove
+  end
+  object IdleTimer1: TIdleTimer
+    Interval = 10
+    OnTimer = IdleTimer1Timer
+    Left = 18
+    Top = 12
+  end
+  object IdleTimer2: TIdleTimer
+    Enabled = False
+    Interval = 30000
+    OnTimer = IdleTimer2Timer
+    Left = 80
+    Top = 12
+  end
+end
