@@ -39,8 +39,8 @@
         <Filename Value="server.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="55"/>
-        <CursorPos X="84" Y="72"/>
+        <TopLine Value="22"/>
+        <CursorPos Y="42"/>
         <UsageCount Value="27"/>
         <Loaded Value="True"/>
       </Unit0>

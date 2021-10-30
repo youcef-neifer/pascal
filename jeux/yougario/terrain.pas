@@ -8,6 +8,10 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
   Player, TcpIpClient;
 
+const
+  MaxPlayersQty = 50;
+  MaxMiettesQty = 300;
+
 type
 
   { TForm1 }
@@ -21,9 +25,10 @@ type
     procedure MouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure StartGame(Sender: TObject);
     procedure IdleTimer1Timer(Sender: TObject);
-    procedure CreateMiette(Sender: TObject);
     procedure UpdatePlayer(Data: string; out n: Integer);
     procedure UpdatePlayer(Params: array of string; out n: Integer);
+    procedure UpdateMiette(Data: string; out n: Integer);
+    procedure UpdateMiette(Params: array of string; out n: Integer);
     procedure StopGame(Sender: TObject; var CloseAction: TCloseAction);
   private
     function GetMyPlayer: TPlayer;
@@ -31,8 +36,8 @@ type
     Client: TTcpIpClientSocket;
     Data: String;
     DataSize: LongInt;
-    Miettes: array of TMiette;
-    Players: array[1..50] of TPlayer;
+    Miettes: array[1..MaxMiettesQty] of TMiette;
+    Players: array[1..MaxPlayersQty] of TPlayer;
     Mouse: TPoint;
     MyIndex: Integer;
     property MyPlayer:TPlayer read GetMyPlayer;
@@ -51,13 +56,12 @@ implementation
 
 procedure TForm1.IdleTimer1Timer(Sender: TObject);
 var
-  Miette: TMiette;
-  mietteindex: Integer;
   BrushColor: TColor;
   i, n: Integer;
   ARect: TRect;
   params, lines: array of String;
-  alive: array[1..50] of Boolean;
+  alive: array[Low(Players)..High(Players)] of Boolean;
+  alivemiette: array[Low(Miettes)..High(Miettes)] of Boolean;
 begin
   Data := 'REFRESH';
   if Client.CanWrite(6000) then begin
@@ -65,6 +69,9 @@ begin
   end;
   for i := Low(alive) to High(alive) do begin
     alive[i] := False;
+  end;
+  for i := Low(alivemiette) to High(alivemiette) do begin
+    alivemiette[i] := False;
   end;
   if Client.CanRead(6000) then begin
       DataSize := Client.Waiting;
@@ -80,10 +87,8 @@ begin
             alive[n] := True;
           end;
           'MIETTE':begin
-            n := StrToInt(Params[1]);
-            Miettes[n].Position := Point(StrToInt(params[2]), StrToInt(params[3]));
-            Miettes[n].Taille := Trunc(StrToFloat(params[4]));
-            Miettes[n].Color := StrToInt(params[5]);
+            UpdateMiette(Params, n);
+            alivemiette[n] := True;
           end;
         end;
       end;
@@ -119,27 +124,28 @@ begin
       if Assigned(Players[i]) and (i <> MyIndex) then begin
         if MyPlayer.Mange(Players[i]) then begin
           Players[i] := nil;
-          Data := format('KILL %d', [i]);
+          Data := format('KILL PLAYER %d' + LineEnding, [i]);
           Client.Write(Data[1], Length(Data));
         end else with Players[i], Position do begin
+          Brush.Color := Players[i].Color;
           Ellipse(Players[i].Rect);
         end;
       end;
     end;
-    mietteindex := 1;
-    while mietteindex <= High(Miettes) do begin
-      Miette := Miettes[mietteindex];
-      if MyPlayer.Mange(Miette) then begin
-          Delete(Miettes, mietteindex, 1);
-      end else begin
-        Brush.Color := Miette.Color;
-        Ellipse(Miette.Rect);
+    for i := Low(Miettes) to High(Miettes) do begin
+      if Assigned(Miettes[i]) then begin
+        if MyPlayer.Mange(Miettes[i]) then begin
+            Miettes[i] := nil;
+            Data := format('KILL MIETTE %d' + LineEnding, [i]);
+            Client.Write(Data[1], Length(Data));
+        end else begin
+          Brush.Color := Miettes[i].Color;
+          Ellipse(Miettes[i].Rect);
+        end;
       end;
-      mietteindex += 1;
     end;
     Brush.Color := BrushColor;
   end;
-  CreateMiette(Sender);
   if Client.CanWrite(6000) then with MyPlayer, Position do begin
     Data := format('UPDATE %d %d %d %.15f' + LineEnding, [MyIndex, X, Y, FTaille]);
     Client.Write(Data[1], Length(Data));
@@ -149,7 +155,6 @@ end;
 procedure TForm1.StartGame(Sender: TObject);
 begin
   Randomize;
-  CreateMiette(Sender);
   Client := TTcpIpClientSocket.Create('lt-youcef', 4100);
   Data := 'JOIN';
   Client.Write(Data[1], Length(Data));
@@ -188,16 +193,6 @@ begin
   end;
 end;
 
-procedure TForm1.CreateMiette(Sender: TObject);
-var
-  Miette: TMiette;
-begin
-  if Length(Miettes) < 400 then with PaintBox1 do begin
-    Miette := TMiette.Create(PaintBox1, Point(Random(Width), Random(Height)));
-    Insert(Miette, Miettes, Length(Miettes));
-  end;
-end;
-
 procedure TForm1.UpdatePlayer(Data: string; out n: Integer);
 var
   Params: array of string;
@@ -213,6 +208,27 @@ begin
     Players[n] := TPlayer.Create(PaintBox1, Point(0, 0));
   end;
   with Players[n] do begin
+    Position := Point(StrToInt(params[2]), StrToInt(params[3]));
+    FTaille := StrToFloat(params[4]);
+    Color := StrToInt(params[5]);
+  end;
+end;
+
+procedure TForm1.UpdateMiette(Data: string; out n: Integer);
+var
+  Params: array of string;
+begin
+  Params := Data.Split(' ');
+  UpdateMiette(Params, n);
+end;
+
+procedure TForm1.UpdateMiette(Params: array of string; out n: Integer);
+begin
+  n := StrToInt(Params[1]);
+  if not Assigned(Miettes[n]) then begin
+    Miettes[n] := TMiette.Create(PaintBox1, Point(0, 0));
+  end;
+  with Miettes[n] do begin
     Position := Point(StrToInt(params[2]), StrToInt(params[3]));
     FTaille := StrToFloat(params[4]);
     Color := StrToInt(params[5]);
