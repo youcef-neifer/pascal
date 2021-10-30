@@ -127,6 +127,7 @@ begin
           VData := 'INVALID:' + VData;
         end;
         if Length(VData) > 0 then begin
+          VDATA += ' END';
           WriteLn('Server answers: "', VDATA, '"');
           VClient.Write(VData[1], Length(VData));
         end;

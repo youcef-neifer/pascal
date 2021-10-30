@@ -55,13 +55,15 @@ implementation
 { TForm1 }
 
 procedure TForm1.IdleTimer1Timer(Sender: TObject);
+const
+  bufSize = 64;
 var
   BrushColor: TColor;
   i, n: Integer;
   ARect: TRect;
   params, lines: array of String;
   alive: array[Low(Players)..High(Players)] of Boolean;
-  alivemiette: array[Low(Miettes)..High(Miettes)] of Boolean;
+  buffer: string[bufSize];
 begin
   Data := 'REFRESH';
   if Client.CanWrite(6000) then begin
@@ -70,15 +72,17 @@ begin
   for i := Low(alive) to High(alive) do begin
     alive[i] := False;
   end;
-  for i := Low(alivemiette) to High(alivemiette) do begin
-    alivemiette[i] := False;
-  end;
   if Client.CanRead(6000) then begin
-      DataSize := Client.Waiting;
-      SetLength(Data, DataSize);
-      DataSize := Client.Read(Data[1], DataSize);
-      SetLength(Data, DataSize);
+    Data := '';
+      repeat
+        DataSize := Client.Read(buffer[1], bufSize);
+        SetLength(Buffer, DataSize);
+        Data += buffer;
+        WriteLn(copy(Data, Length(Data) - 4, 5));
+      until copy(Data, Length(Data) - 3, 4) = ' END';
+      SetLength(Data, Length(Data) - 4);
       lines := Data.Split(LineEnding);
+      WriteLn(Data);
       for i := Low(lines) to High(lines) do begin
         params := lines[i].Split(' ');
         case params[0] of
@@ -88,7 +92,6 @@ begin
           end;
           'MIETTE':begin
             UpdateMiette(Params, n);
-            alivemiette[n] := True;
           end;
         end;
       end;
