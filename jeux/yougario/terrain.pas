@@ -141,7 +141,7 @@ begin
   end;
   CreateMiette(Sender);
   if Client.CanWrite(6000) then with MyPlayer, Position do begin
-    Data := format('UPDATE %d %d %d %.15f', [MyIndex, X, Y, FTaille]);
+    Data := format('UPDATE %d %d %d %.15f' + LineEnding, [MyIndex, X, Y, FTaille]);
     Client.Write(Data[1], Length(Data));
   end;
 end;
