@@ -5,7 +5,7 @@ unit player;
 interface
 
 uses
-  Classes, SysUtils, Graphics;
+  Classes, SysUtils, Graphics, ExtCtrls;
 
 type
 
@@ -19,8 +19,9 @@ type
       procedure SetTaille(AValue: Integer);
     public
       FTaille: Real;
-      constructor Create(AOwner: TComponent; APosition: TPoint); virtual;
+      constructor Create(AOwner: TComponent; APosition: TPoint); virtual; overload;
       function Rect: TRect; overload;
+      procedure Paint; virtual;
       property Color: TColor read FColor write FColor;
       property Position: TPoint read FPosition write FPosition;
       property Taille: Integer read GetTaille write SetTaille;
@@ -53,6 +54,7 @@ type
       function Rect(PosX: Integer; PosY, rayon: Integer): TRect; overload;
       function Mange(Player: TMiette): Boolean;
       procedure Balance(PosMouseX, PosMouseY: Integer);
+      procedure Paint; override;
       procedure Reconstitue;
       property Boule: Boules read FBoule;
   end;
@@ -91,6 +93,14 @@ begin
     Top := FPosition.Y - rayon;
     Right := FPosition.X + rayon;
     Bottom := FPosition.Y + rayon;
+  end;
+end;
+
+procedure TMiette.Paint;
+begin
+  with Owner as TPaintBox, Canvas do begin
+    Brush.Color := Self.Color;
+    Ellipse(Rect);
   end;
 end;
 
@@ -229,6 +239,21 @@ begin
           FBoule.Y[i] := Trunc(FBoule.Y[i - 1]) + Trunc((rayon + FBoule.ATaille[i] / 2) * sin(alpha));
         end;
       end;
+    end;
+  end;
+end;
+
+procedure TPlayer.Paint;
+var
+  ARect : TRect;
+  i: Integer;
+begin
+  with Owner as TPaintBox, Canvas do begin
+    Brush.Color := Self.Color;
+    ARect := Rect(Position.X, Position.Y, Taille div 2);
+    for i := 1 to Boule.NB do begin
+      Ellipse(ARect);
+      ARect := Rect(Boule.X[i+1], Boule.Y[i+1], Trunc(Boule.ATaille[i+1]) div 2);
     end;
   end;
 end;

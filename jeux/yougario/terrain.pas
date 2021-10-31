@@ -22,7 +22,7 @@ type
     PaintBox1: TPaintBox;
     procedure FormKeyPress(Sender: TObject; var Key: char);
     procedure IdleTimer2Timer(Sender: TObject);
-    procedure MouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    procedure MouseMoved(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure StartGame(Sender: TObject);
     procedure IdleTimer1Timer(Sender: TObject);
     procedure UpdatePlayer(Data: string; out n: Integer);
@@ -117,21 +117,15 @@ begin
     Canvas.Clear;
     TextOut(PaintBox1.Width - 25, PaintBox1.Height - 30, IntToStr(MyPlayer.Taille));
     BrushColor := Brush.Color;
-    Brush.Color := MyPlayer.Color;
-    ARect := MyPlayer.Rect(MyPlayer.Position.X, MyPlayer.Position.Y, MyPlayer.Taille div 2);
-    for i := 1 to MyPlayer.Boule.NB do begin
-      Ellipse(ARect);
-      ARect := MyPlayer.Rect(MyPlayer.Boule.X[i+1], MyPlayer.Boule.Y[i+1], Trunc(MyPlayer.Boule.ATaille[i+1]) div 2);
-    end;
+    MyPlayer.Paint;
     for i := Low(Players) to High(Players) do begin
       if Assigned(Players[i]) and (i <> MyIndex) then begin
         if MyPlayer.Mange(Players[i]) then begin
           Players[i] := nil;
           Data := format('KILL PLAYER %d' + LineEnding, [i]);
           Client.Write(Data[1], Length(Data));
-        end else with Players[i], Position do begin
-          Brush.Color := Players[i].Color;
-          Ellipse(Players[i].Rect);
+        end else begin
+          Players[i].Paint;
         end;
       end;
     end;
@@ -142,8 +136,7 @@ begin
             Data := format('KILL MIETTE %d' + LineEnding, [i]);
             Client.Write(Data[1], Length(Data));
         end else begin
-          Brush.Color := Miettes[i].Color;
-          Ellipse(Miettes[i].Rect);
+          Miettes[i].Paint;
         end;
       end;
     end;
@@ -169,7 +162,7 @@ begin
   end;
 end;
 
-procedure TForm1.MouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+procedure TForm1.MouseMoved(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 begin
   Mouse.X := X;
   Mouse.Y := Y;

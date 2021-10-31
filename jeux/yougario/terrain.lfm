@@ -16,7 +16,7 @@ object Form1: TForm1
     Top = 0
     Width = 902
     Align = alClient
-    OnMouseMove = MouseMove
+    OnMouseMove = MouseMoved
   end
   object IdleTimer1: TIdleTimer
     Interval = 10
