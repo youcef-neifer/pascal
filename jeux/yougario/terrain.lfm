@@ -1,20 +1,20 @@
 object Form1: TForm1
   Left = 426
-  Height = 765
-  Top = 165
-  Width = 902
+  Height = 1016
+  Top = 27
+  Width = 1280
   Caption = 'Form1'
-  ClientHeight = 765
-  ClientWidth = 902
+  ClientHeight = 1016
+  ClientWidth = 1280
   OnClose = StopGame
   OnCreate = StartGame
   OnKeyPress = FormKeyPress
   LCLVersion = '2.0.12.0'
   object PaintBox1: TPaintBox
     Left = 0
-    Height = 765
+    Height = 1016
     Top = 0
-    Width = 902
+    Width = 1280
     Align = alClient
     OnMouseMove = MouseMoved
   end
