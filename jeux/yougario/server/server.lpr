@@ -44,6 +44,7 @@ var
   n, i: Integer;
   Data: string;
   lines: array of string;
+  PlayerIndex: Integer;
 begin
 
   WriteLn('Start server ', p^.Socket);
@@ -66,14 +67,13 @@ begin
       if VClient.CanRead(60000) then
       begin
         VDataSize := VClient.Waiting;
+        if VDataSize = 0 then begin
+          break;
+        end;
         SetLength(VData, VDataSize);
         VClient.Read(VData[1], VDataSize);
         WriteLn('Client says: "', VData, '"');
         WriteLn('len = ', Length(VData));
-        if Length(VData) = 0 then begin
-          Write(4);
-          break;
-        end;
         lines := Trim(VData).Split(LineEnding);
         for Data in lines do try
           params := Trim(Data).Split(' ');
@@ -81,6 +81,7 @@ begin
           case params[0] of
             'JOIN': begin
               PlayersQty += 1;
+              PlayerIndex := PlayersQty;
               with Players[PlayersQty] do begin
                 Alive := True;
                 X := Random(200);
@@ -142,6 +143,10 @@ begin
     end;
   until false;
   VClient.Free;
+  with Players[PlayerIndex] do begin
+    WriteLn('Killing disconnected player ', PlayerIndex);
+    Alive := False;
+  end;
   Result := 0;
 end;
 
