@@ -20,6 +20,7 @@ type
     Alive: Boolean;
     X, Y, Color: Integer;
     Taille: Real;
+    Boules: string;
   end;
   TPlayers = array[1..MaxPlayersQty] of TPlayer;
   TMiettes = array[1..MaxMiettesQty] of TPlayer;
@@ -40,7 +41,7 @@ var
   VSocket,VDataSize: LongInt;
   VClient: TTcpIpClientSocket;
   params: array of string;
-  n: Integer;
+  n, i: Integer;
   Data: string;
   lines: array of string;
 begin
@@ -103,6 +104,10 @@ begin
                 X := StrToInt(params[2]);
                 Y := StrToInt(params[3]);
                 Taille := StrToFloat(params[4]);
+                Boules := '';
+                for i := 5 to High(params) do begin
+                  Boules += params[i];
+              end;
               end;
             end;
             'KILL': begin
