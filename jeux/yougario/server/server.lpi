@@ -9,6 +9,7 @@
         <MainUnitHasCreateFormStatements Value="False"/>
         <MainUnitHasTitleStatement Value="False"/>
       </Flags>
+      <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
       <Title Value="server"/>
       <UseAppBundle Value="False"/>
@@ -17,7 +18,7 @@
     <i18n>
       <EnableI18N LFM="False"/>
     </i18n>
-    <BuildModes Count="1" Active="Default">
+    <BuildModes Count="1">
       <Item1 Name="Default" Default="True"/>
     </BuildModes>
     <PublishOptions>
@@ -38,19 +39,10 @@
       <Unit0>
         <Filename Value="server.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
-        <TopLine Value="22"/>
-        <CursorPos Y="42"/>
-        <UsageCount Value="27"/>
-        <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="message.lfm"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="18" Y="2"/>
-        <UsageCount Value="27"/>
-        <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit1>
     </Units>
   </ProjectOptions>

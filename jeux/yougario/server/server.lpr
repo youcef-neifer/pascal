@@ -16,14 +16,21 @@ type
   TThreadParameters = record
     Socket: LongInt;
   end;
-  TPlayer = record
+
+  TBoule = record
     Alive: Boolean;
     X, Y, Color: Integer;
     Taille: Real;
-    Boules: string;
+  end;
+
+  TMiette = TBoule;
+
+  TPlayer = record
+    Boules: array[1..16] of TBoule;
+    args: string;
   end;
   TPlayers = array[1..MaxPlayersQty] of TPlayer;
-  TMiettes = array[1..MaxMiettesQty] of TPlayer;
+  TMiettes = array[1..MaxMiettesQty] of TMiette;
 
 const
   CONNECTION_PORT = 4100;
@@ -45,6 +52,7 @@ var
   Data: string;
   lines: array of string;
   PlayerIndex: Integer;
+  paramsIndex, BouleIndex: Integer;
 begin
 
   WriteLn('Start server ', p^.Socket);
@@ -82,7 +90,7 @@ begin
             'JOIN': begin
               PlayersQty += 1;
               PlayerIndex := PlayersQty;
-              with Players[PlayersQty] do begin
+              with Players[PlayersQty].Boules[1] do begin
                 Alive := True;
                 X := Random(200);
                 Y := Random(200);
@@ -92,7 +100,7 @@ begin
               end;
             end;
             'REFRESH':begin
-              for n := 1 to PlayersQty do with Players[n] do if Alive then begin
+              for n := 1 to PlayersQty do with Players[n].Boules[1] do if Alive then begin
                 VDATA += format('PLAYER %d %d %d %.15f %d', [n, X, Y, Taille, Color]) + LineEnding;
               end;
               for n := 1 to MiettesQty do with Miettes[n] do if Alive then begin
@@ -101,21 +109,28 @@ begin
             end;
             'UPDATE': begin
               n := StrToInt(params[1]);
-              with Players[n] do begin
+              with Players[n].Boules[1] do begin
                 X := StrToInt(params[2]);
                 Y := StrToInt(params[3]);
                 Taille := StrToFloat(params[4]);
-                Boules := '';
-                for i := 5 to High(params) do begin
-                  Boules += params[i];
-              end;
+                Players[n].args := '';
+                paramsIndex := 5;
+                for i := 2 to High(Players[n].Boules) do with Players[n], Boules[i] do begin
+                  if params[paramsIndex] <> '' then begin
+                     BouleIndex := StrToInt(params[paramsIndex]);
+                     X := StrToInt(params[paramsIndex + 1]);
+                     Y := StrToInt(params[paramsIndex + 2]);
+                     Taille := StrToFloat(params[paramsIndex + 3]);
+                     PlayerIndex += 4;
+                  end;
+                end;
               end;
             end;
             'KILL': begin
               case params[1] of
                 'PLAYER':begin
                   n := StrToInt(params[2]);
-                  with Players[n] do begin
+                  with Players[n].Boules[1] do begin
                     WriteLn('Killing player ', n);
                     Alive := False;
                   end;
@@ -143,7 +158,7 @@ begin
     end;
   until false;
   VClient.Free;
-  with Players[PlayerIndex] do begin
+  with Players[PlayerIndex].Boules[1] do begin
     WriteLn('Killing disconnected player ', PlayerIndex);
     Alive := False;
   end;

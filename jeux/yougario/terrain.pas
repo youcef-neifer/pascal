@@ -78,11 +78,11 @@ begin
         DataSize := Client.Read(buffer[1], bufSize);
         SetLength(Buffer, DataSize);
         Data += buffer;
-        WriteLn(copy(Data, Length(Data) - 4, 5));
+        //WriteLn(copy(Data, Length(Data) - 4, 5));
       until copy(Data, Length(Data) - 3, 4) = ' END';
       SetLength(Data, Length(Data) - 4);
       lines := Data.Split(LineEnding);
-      WriteLn(Data);
+      //WriteLn(Data);
       for i := Low(lines) to High(lines) do begin
         params := lines[i].Split(' ');
         case params[0] of
