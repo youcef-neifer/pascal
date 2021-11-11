@@ -3,7 +3,7 @@ object Form1: TForm1
   Height = 1016
   Top = 27
   Width = 1280
-  Caption = 'Form1'
+  Caption = 'yougario'
   ClientHeight = 1016
   ClientWidth = 1280
   OnClose = StopGame
