@@ -35,6 +35,9 @@ type
 const
   CONNECTION_PORT = 4100;
 
+threadvar
+  threadParameters: TThreadParameters;
+
 var
   PlayersQty: Integer;
   MiettesQTY: Integer;
@@ -166,13 +169,10 @@ begin
 end;
 
 procedure ServeClient(Socket: LongInt);
-var
-  parameters: PThreadParameters;
 begin
   WriteLn('Open port ', Socket);
-  New(parameters);
-  parameters^.Socket := Socket;
-  BeginThread(@ThreadFunction, parameters);
+  threadParameters.Socket := Socket;
+  BeginThread(@ThreadFunction, @threadParameters);
 end;
 
 var
