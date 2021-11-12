@@ -27,24 +27,23 @@ type
       property Taille: Integer read GetTaille write SetTaille;
   end;
 
-  ATMiette = array[1..100] of TMiette;
-
-
-  Boules = record
-    NB: Integer;
-    X, Y: array[2..16] of Integer;
-    ATaille: array[2..16] of Real;
+  TBoule = record
+    X, Y: Integer;
+    ATaille: Real;
   end;
+
+  TBoules = array[2..16] of TBoule;
 
   { TPlayer }
 
   TPlayer = class(TMiette)
     private
-      FBoule: Boules;
+      FBoule: TBoules;
       alpha: Real;
       function GetTaille: Integer;
       procedure SetTaille(AValue: Integer);
     public
+      numberboule: Integer;
       propulsion: Integer;
       constructor Create(AOwner: TComponent; APosition: TPoint); override;
       function distance(X, Y: Integer; Player: TMiette): Integer;
@@ -56,7 +55,7 @@ type
       procedure Balance(PosMouseX, PosMouseY: Integer);
       procedure Paint; override;
       procedure Reconstitue;
-      property Boule: Boules read FBoule;
+      property Boule: TBoules read FBoule;
   end;
 
 implementation
@@ -122,7 +121,7 @@ begin
   FPosition := APosition;
   FTaille := 27;
   Color := Graphics.RGBToColor(Random(255), Random(255), Random(255));
-  FBoule.Nb := 1;
+  numberboule := 1;
   propulsion := 0;
 end;
 
@@ -149,13 +148,13 @@ begin
   with FPosition do begin
     X += dx;
     Y += dy;
-    FBoule.X[2] := Position.X + Trunc((rayon + Boule.ATaille[2] / 2 + propulsion) * cos(alpha));
-    FBoule.Y[2] := Position.Y + Trunc((rayon + Boule.ATaille[2] / 2 + propulsion) * sin(alpha));
-    if Boule.NB > 3 then begin
+    FBoule[2].X := Position.X + Trunc((rayon + Boule[2].ATaille / 2 + propulsion) * cos(alpha));
+    FBoule[2].Y := Position.Y + Trunc((rayon + Boule[2].ATaille / 2 + propulsion) * sin(alpha));
+    if numberboule > 3 then begin
       for i := 3 to 16 do begin
-        rayon := Trunc(FBoule.ATaille[i - 1]) div 2;
-        FBoule.X[i] := Trunc(FBoule.X[i - 1]) + Trunc((rayon + Boule.ATaille[i] / 2) * cos(alpha));
-        FBoule.Y[i] := Trunc(FBoule.Y[i - 1]) + Trunc((rayon + Boule.ATaille[i] / 2) * sin(alpha));
+        rayon := Trunc(FBoule[i - 1].ATaille) div 2;
+        FBoule[i].X := Trunc(FBoule[i - 1].X) + Trunc((rayon + Boule[i].ATaille / 2) * cos(alpha));
+        FBoule[i].Y := Trunc(FBoule[i - 1].Y) + Trunc((rayon + Boule[i].ATaille / 2) * sin(alpha));
       end;
     end;
   end;
@@ -188,10 +187,10 @@ begin
     FTaille := Sqrt(FTaille ** 2 + Player.FTaille ** 2);
     Player.Free;
     Result := True;
-  end else if Boule.NB > 1 then begin
-     for i := 2 to Boule.NB do begin
-       if distance(Boule.X[i], Boule.Y[i], Player) < (Taille + Player.Taille) div 2 then begin
-          FBoule.ATaille[i] := Sqrt(Boule.ATaille[i] ** 2 + Player.FTaille ** 2);
+  end else if numberboule > 1 then begin
+     for i := 2 to numberboule do begin
+       if distance(Boule[i].X, Boule[i].Y, Player) < (Taille + Player.Taille) div 2 then begin
+          FBoule[i].ATaille := Sqrt(Boule[i].ATaille ** 2 + Player.FTaille ** 2);
           Player.Free;
           Result := True;
           Exit;
@@ -208,35 +207,35 @@ var
   TailleCondition: array[1..16] of Real;
 begin
   alpha := ArcTan2(PosMouseX - Position.X, PosMouseY - Position.Y);
-  for j := 1 to FBoule.NB do begin
+  for j := 1 to numberboule do begin
     if j = 1 then begin
       TailleCondition[j] := FTaille;
       nbBoule[j] := FTaille;
     end else begin
-      TailleCondition[j] := FBoule.ATaille[j];
-      nbBoule[j] := FBoule.ATaille[j];
+      TailleCondition[j] := FBoule[j].ATaille;
+      nbBoule[j] := FBoule[j].ATaille;
     end;
   end;
-  for j := 1 to FBoule.NB do begin
-    WriteLn((FBoule.NB < 16) and (Trunc(TailleCondition[j]) >= 36));
-    if (FBoule.NB < 16) and (Trunc(TailleCondition[j]) >= 36) then begin
-      FBoule.NB := FBoule.NB + 1;
-      if j = 1 then TailleBoule := FTaille else TailleBoule := FBoule.ATaille[j];
+  for j := 1 to numberboule do begin
+    WriteLn((numberboule < 16) and (Trunc(TailleCondition[j]) >= 36));
+    if (numberboule < 16) and (Trunc(TailleCondition[j]) >= 36) then begin
+      numberboule := numberboule + 1;
+      if j = 1 then TailleBoule := FTaille else TailleBoule := FBoule[j].ATaille;
       TailleBoule /= 2;
       nbBoule[j] := TailleBoule;
-      nbBoule[FBoule.NB] := TailleBoule;
+      nbBoule[numberboule] := TailleBoule;
       FTaille := nbBoule[1];
       WriteLn('Taille = ', nbBoule[1], ' and J = ', j);
-      FBoule.ATaille[2] := nbBoule[2];
+      FBoule[2].ATaille := nbBoule[2];
       rayon := Trunc(nbBoule[1]) div 2;
-      FBoule.X[2] := Position.X + Trunc((rayon + FBoule.ATaille[2] / 2) * cos(alpha));
-      FBoule.Y[2] := Position.Y + Trunc((rayon + FBoule.ATaille[2] / 2) * sin(alpha));
-      if Boule.NB >= 3 then begin
+      FBoule[2].X := Position.X + Trunc((rayon + FBoule[2].ATaille / 2) * cos(alpha));
+      FBoule[2].Y := Position.Y + Trunc((rayon + FBoule[2].ATaille / 2) * sin(alpha));
+      if numberboule >= 3 then begin
         for i := 3 to 16 do begin
           rayon := Trunc(nbBoule[i - 1]) div 2;
-          FBoule.ATaille[i] := nbBoule[i];
-          FBoule.X[i] := Trunc(FBoule.X[i - 1]) + Trunc((rayon + FBoule.ATaille[i] / 2) * cos(alpha));
-          FBoule.Y[i] := Trunc(FBoule.Y[i - 1]) + Trunc((rayon + FBoule.ATaille[i] / 2) * sin(alpha));
+          FBoule[i].ATaille := nbBoule[i];
+          FBoule[i].X := Trunc(FBoule[i - 1].X) + Trunc((rayon + FBoule[i].ATaille / 2) * cos(alpha));
+          FBoule[i].Y := Trunc(FBoule[i - 1].Y) + Trunc((rayon + FBoule[i].ATaille / 2) * sin(alpha));
         end;
       end;
     end;
@@ -251,9 +250,9 @@ begin
   with Owner as TPaintBox, Canvas do begin
     Brush.Color := Self.Color;
     ARect := Rect(Position.X, Position.Y, Taille div 2);
-    for i := 1 to Boule.NB do begin
+    for i := 1 to numberboule do begin
       Ellipse(ARect);
-      ARect := Rect(Boule.X[i+1], Boule.Y[i+1], Trunc(Boule.ATaille[i+1]) div 2);
+      ARect := Rect(Boule[i+1].X, Boule[i+1].Y, Trunc(Boule[i+1].ATaille) div 2);
     end;
   end;
 end;
@@ -262,10 +261,10 @@ procedure TPlayer.Reconstitue;
 var
   i: Integer;
 begin
-  if FBoule.NB > 1 then begin
-    for i := 2 to Boule.NB do begin
-      FTaille += Boule.ATaille[i];
-      FBoule.NB := 1;
+  if numberboule > 1 then begin
+    for i := 2 to numberboule do begin
+      FTaille += Boule[i].ATaille;
+      numberboule := 1;
     end;
   end;
 end;
