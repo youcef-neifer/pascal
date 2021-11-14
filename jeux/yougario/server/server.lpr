@@ -3,7 +3,7 @@ program server;
 {$mode objfpc}{$H+}
 
 uses
-  cthreads, TcpIpServer, TcpIpClient, sysutils, Graphics, Classes;
+  cthreads, BaseUnix, lCommon, lNet, lnetbase, sysutils, Graphics, Classes;
 
 const
   MaxPlayersQty = 50;
@@ -12,11 +12,6 @@ const
   WindowHight = 1024;
 
 type
-  PThreadParameters = ^TThreadParameters;
-  TThreadParameters = record
-    Socket: LongInt;
-  end;
-
   TBoule = record
     Alive: Boolean;
     X, Y, Color: Integer;
@@ -26,45 +21,61 @@ type
   TMiette = TBoule;
 
   TPlayer = record
-    Alive: Boolean;
+    SocketPtr: Pointer;
     Boules: array[1..16] of TBoule;
   end;
   TPlayers = array[1..MaxPlayersQty] of TPlayer;
   TMiettes = array[1..MaxMiettesQty] of TMiette;
 
+  { TConnectionSocket }
+
+  TConnectionSocket = class(TLTcp)
+    procedure HandleAccept(Socket: TLSocket);
+    procedure HandleDisconnect(Socket: TLSocket);
+    procedure HandleReceive(Socket: TLSocket);
+  end;
+
 const
   CONNECTION_PORT = 4100;
-
-threadvar
-  threadParameters: TThreadParameters;
 
 var
   PlayersQty: Integer;
   MiettesQTY: Integer;
   Players: TPlayers;
   Miettes: TMiettes;
+  Quit: Boolean;
 
-function ThreadFunction(parameter: pointer): ptrint;
+{ TConnectionSocket }
+
+procedure TConnectionSocket.HandleAccept(Socket: TLSocket);
+begin
+  WriteLn('Accepted connection for ', Socket.Handle);
+end;
+
+procedure TConnectionSocket.HandleDisconnect(Socket: TLSocket);
 var
-  p: PThreadParameters absolute parameter;
+  n: Integer;
+begin
+  for n := Low(Players) to High(Players) do with Players[n] do begin
+    if SocketPtr = Pointer(Socket) then begin
+      SocketPtr := nil;
+      WriteLn('Killed player ', n);
+      Break;
+    end;
+  end;
+end;
+
+procedure TConnectionSocket.HandleReceive(Socket: TLSocket);
+var
   VData: string;
-  VSocket,VDataSize: LongInt;
-  VClient: TTcpIpClientSocket;
+  VDataSize: LongInt;
   params: array of string;
   n, i: Integer;
   Data: string;
   lines: array of string;
-  PlayerIndex: Integer;
   paramsIndex, BouleIndex: Integer;
 begin
-
-  WriteLn('Start server ', p^.Socket);
-  VSocket := p^.Socket;
-  if VSocket = -1 then
-    WriteLn('ERROR');
-  VClient := TTcpIpClientSocket.Create(VSocket);
   MiettesQTY := Length(Miettes);
-  repeat
     for n := Low(Miettes) to High(Miettes) do begin
       if not Miettes[n].Alive then with Miettes[n] do begin
         Alive := True;
@@ -75,14 +86,10 @@ begin
       end;
     end;
     try
-      if VClient.CanRead(60000) then
-      begin
-        VDataSize := VClient.Waiting;
-        if VDataSize = 0 then begin
-          break;
-        end;
-        SetLength(VData, VDataSize);
-        VClient.Read(VData[1], VDataSize);
+      VDataSize := 0;
+      VDataSize := Socket.GetMessage(VData);
+      WriteLn('Data size = ', VDataSize);
+      if VDataSize > 0 then begin
         WriteLn('Client says: "', VData, '"');
         WriteLn('len = ', Length(VData));
         lines := Trim(VData).Split(LineEnding);
@@ -92,9 +99,8 @@ begin
           case params[0] of
             'JOIN': begin
               PlayersQty += 1;
-              PlayerIndex := PlayersQty;
-              with Players[PlayersQty].Boules[1] do begin
-                Players[PlayersQty].Alive := True;
+              with Players[PlayersQty], Boules[1] do begin
+                SocketPtr := Socket;
                 X := Random(200);
                 Y := Random(200);
                 Taille := 27;
@@ -103,7 +109,7 @@ begin
               end;
             end;
             'REFRESH':begin
-              for n := 1 to PlayersQty do with Players[n].Boules[1] do if Players[n].Alive then begin
+              for n := 1 to PlayersQty do with Players[n].Boules[1] do if Assigned(Players[n].SocketPtr) then begin
                 VDATA += format('PLAYER %d %d %d %.15f %d', [n, X, Y, Taille, Color]) + LineEnding;
               end;
               for n := 1 to MiettesQty do with Miettes[n] do if Alive then begin
@@ -134,7 +140,7 @@ begin
                   n := StrToInt(params[2]);
                   with Players[n] do begin
                     WriteLn('Killing player ', n);
-                    Alive := False;
+                    SocketPtr := nil;
                   end;
                 end;
                 'MIETTE':begin
@@ -152,41 +158,49 @@ begin
         if Length(VData) > 0 then begin
           VDATA += ' END';
           WriteLn('Server answers: "', VDATA, '"');
-          VClient.Write(VData[1], Length(VData));
+          Socket.SendMessage(VData);
         end;
       end;
     finally
       WriteLn('--Try Next');
     end;
-  until false;
-  VClient.Free;
-  with Players[PlayerIndex] do begin
-    WriteLn('Killing disconnected player ', PlayerIndex);
-    Alive := False;
-  end;
-  Result := 0;
 end;
 
-procedure ServeClient(Socket: LongInt);
+procedure QuitCleanly(sig : cint);cdecl;
 begin
-  WriteLn('Open port ', Socket);
-  threadParameters.Socket := Socket;
-  BeginThread(@ThreadFunction, @threadParameters);
+  Quit := True;
+  WriteLn('Received signal = ', sig);
 end;
 
 var
-  VSocket: LongInt;
-  VServer: TTcpIpServerSocket;
+  ServerSocket: TConnectionSocket;
+
 begin
   PlayersQty := 0;
-  VServer := TTcpIpServerSocket.Create(CONNECTION_PORT);
-  repeat
-    VServer.Listen;
-    VSocket := VServer.Accept;
-    if VSocket = -1 then
-      continue;
-    ServeClient(VSocket);
-    WriteLn('Wait for next client');
-  until false;
+  Quit := False;
+  fpSignal(SIGINT, @QuitCleanly);
+  ServerSocket := TConnectionSocket.Create(nil);
+  with ServerSocket do begin
+    SocketNet := LAF_INET6;
+    Timeout := -1;
+    OnAccept := @HandleAccept;
+    OnDisconnect := @HandleDisconnect;
+    OnReceive := @HandleReceive;
+  end;
+  if ServerSocket.Listen(CONNECTION_PORT, LADDR6_ANY) then begin
+    WriteLn('Listen detected a connection handle = ', ServerSocket.Socks[0].Handle);
+    try
+      repeat
+        ServerSocket.CallAction;
+        WriteLn('Wait for next client');
+      until Quit;
+    except
+      WriteLn('Some Error!!!!!');
+    end;
+  end else begin
+    WriteLn('Some error ocurred!');
+  end;
+  ServerSocket.Free;
+  WriteLn('Bye');
 end.
 
