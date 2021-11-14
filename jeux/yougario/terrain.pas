@@ -40,6 +40,7 @@ type
     Players: array[1..MaxPlayersQty] of TPlayer;
     Mouse: TPoint;
     MyIndex: Integer;
+    IsBalance, IsReconstitue: Boolean;
     property MyPlayer:TPlayer read GetMyPlayer;
   public
 
@@ -63,7 +64,6 @@ const
 var
   BrushColor: TColor;
   i, n: Integer;
-  ARect: TRect;
   params, lines: array of String;
   alive: array[Low(Players)..High(Players)] of Boolean;
   buffer: string[bufSize];
@@ -81,11 +81,9 @@ begin
         DataSize := Client.Read(buffer[1], bufSize);
         SetLength(Buffer, DataSize);
         Data += buffer;
-        //WriteLn(copy(Data, Length(Data) - 4, 5));
       until copy(Data, Length(Data) - 3, 4) = ' END';
       SetLength(Data, Length(Data) - 4);
       lines := Data.Split(LineEnding);
-      //WriteLn(Data);
       for i := Low(lines) to High(lines) do begin
         params := lines[i].Split(' ');
         case params[0] of
@@ -145,8 +143,20 @@ begin
     end;
     Brush.Color := BrushColor;
   end;
+  if IsBalance = True then begin
+    MyPlayer.Balance(Mouse.X, Mouse.Y);
+    IsBalance := False;
+  end;
+  if IsReconstitue = True then begin
+    MyPlayer.Reconstitue;
+    IsReconstitue := False;
+  end;
   if Client.CanWrite(6000) then with MyPlayer, Position do begin
-    Data := format('UPDATE %d %d %d %.15f' + LineEnding, [MyIndex, X, Y, FTaille]);
+    Data := format('UPDATE %d %d %d %.15f', [MyIndex, X, Y, FTaille]);
+    for i := 2 to MyPlayer.numberboule do with MyPlayer, Boule[i] do begin
+      Data += format(' %d %d %d %.15f', [i, X, Y, ATaille]);
+    end;
+    Data += LineEnding;
     Client.Write(Data[1], Length(Data));
   end;
 end;
@@ -178,7 +188,7 @@ begin
       Application.Terminate;
     end;
     ' ': begin
-      MyPlayer.Balance(Mouse.X, Mouse.Y);
+      IsBalance := True;
       IdleTimer2.Enabled := True;
     end;
   end;
@@ -186,8 +196,8 @@ end;
 
 procedure TForm1.IdleTimer2Timer(Sender: TObject);
 begin
-  if MyPlayer.Boule.NB > 1 then begin
-      MyPlayer.Reconstitue;
+  if (MyPlayer.numberboule > 1) and (MyPlayer.numberboule <= 16) then begin
+      IsReconstitue := True;
       IdleTimer2.Enabled := False;
   end;
 end;
