@@ -3,7 +3,7 @@ program yougario;
 {$mode objfpc}{$H+}
 
 uses
-  cthreads, Interfaces, // this includes the LCL widgetset
+  {$IFDEF UNIX}cthreads,{$ENDIF UNIX} Interfaces, // this includes the LCL widgetset
   Forms, lnetvisual, terrain, player, AppCfg
   { you can add units after this };
 

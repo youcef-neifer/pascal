@@ -10,6 +10,7 @@ const
 
 var
   progPath, ProgDir, ProgName, LibDir: string;
+  UserHomeDir: string;
   CfgPath: string;
 
 implementation
@@ -22,9 +23,14 @@ var
   CfgFile: Text;
   c: Char;
 begin
+  {$IFDEF Windows}
+    UserHomeDir := GetEnvironmentVariable('USERPROFILE');
+  {$ELSE Windows}
+    UserHomeDir := GetEnvironmentVariable('HOME');
+  {$ENDIF Windows}
   CfgPath := GetEnvironmentVariable('XDG_CONFIG_HOME');
   if CfgPath = '' then begin
-    CfgPath := GetEnvironmentVariable('HOME') + '/.config/';
+    CfgPath := UserHomeDir + '/.config/';
   end;
   CfgPath += ProgName;
   if not DirectoryExists(CfgPath) then begin
