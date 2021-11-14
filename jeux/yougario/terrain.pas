@@ -50,6 +50,9 @@ var
 
 implementation
 
+uses
+  AppCfg;
+
 {$R *.lfm}
 
 { TForm1 }
@@ -151,7 +154,7 @@ end;
 procedure TForm1.StartGame(Sender: TObject);
 begin
   Randomize;
-  Client := TTcpIpClientSocket.Create('lt-youcef', 4100);
+  Client := TTcpIpClientSocket.Create(ServerName, ServerPort);
   Data := 'JOIN';
   Client.Write(Data[1], Length(Data));
   if Client.CanRead(60000) then begin

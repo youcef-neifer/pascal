@@ -4,7 +4,7 @@ program yougario;
 
 uses
   cthreads, Interfaces, // this includes the LCL widgetset
-  Forms, terrain, player
+  Forms, terrain, player, AppCfg
   { you can add units after this };
 
 {$R *.res}

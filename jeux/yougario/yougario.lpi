@@ -33,7 +33,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="3">
+    <Units Count="4">
       <Unit0>
         <Filename Value="yougario.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -49,6 +49,11 @@
         <Filename Value="player.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit2>
+      <Unit3>
+        <Filename Value="appcfg.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="AppCfg"/>
+      </Unit3>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
