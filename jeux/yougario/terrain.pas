@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
-  Player, TcpIpClient;
+  lNetComponents, Player, lNet;
 
 const
   MaxPlayersQty = 50;
@@ -19,7 +19,10 @@ type
   TForm1 = class(TForm)
     IdleTimer1: TIdleTimer;
     IdleTimer2: TIdleTimer;
+    Client: TLTCPComponent;
     PaintBox1: TPaintBox;
+    procedure ClientConnect(aSocket: TLSocket);
+    procedure ClientReceive(aSocket: TLSocket);
     procedure FormKeyPress(Sender: TObject; var Key: char);
     procedure IdleTimer2Timer(Sender: TObject);
     procedure MouseMoved(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -33,7 +36,6 @@ type
   private
     function GetMyPlayer: TPlayer;
   private
-    Client: TTcpIpClientSocket;
     Data: String;
     DataSize: LongInt;
     Miettes: array[1..MaxMiettesQty] of TMiette;
@@ -59,27 +61,33 @@ uses
 { TForm1 }
 
 procedure TForm1.IdleTimer1Timer(Sender: TObject);
-const
-  bufSize = 64;
 var
   BrushColor: TColor;
   i, n: Integer;
   params, lines: array of String;
   alive: array[Low(Players)..High(Players)] of Boolean;
-  buffer: string[bufSize];
+  buffer: string;
 begin
-  Data := 'REFRESH';
-  if Client.CanWrite(6000) then begin
-    Client.Write(Data[1], Length(Data));
+  with Client do begin
+    SendMessage('REFRESH');
   end;
   for i := Low(alive) to High(alive) do begin
     alive[i] := False;
   end;
-  if Client.CanRead(6000) then begin
+end;
+
+procedure TForm1.ClientReceive(aSocket: TLSocket);
+var
+  BrushColor: TColor;
+  i, n: Integer;
+  params, lines: array of String;
+  alive: array[Low(Players)..High(Players)] of Boolean;
+  buffer: string;
+begin
+  with aSocket do begin
     Data := '';
       repeat
-        DataSize := Client.Read(buffer[1], bufSize);
-        SetLength(Buffer, DataSize);
+        GetMessage(Buffer);
         Data += buffer;
       until copy(Data, Length(Data) - 3, 4) = ' END';
       SetLength(Data, Length(Data) - 4);
@@ -95,6 +103,9 @@ begin
             UpdateMiette(Params, n);
           end;
         end;
+      end;
+      if length(lines) = 1 then begin
+        MyIndex := n;
       end;
   end;
   for i := Low(alive) to High(alive) do begin
@@ -124,7 +135,7 @@ begin
         if MyPlayer.Mange(Players[i]) then begin
           Players[i] := nil;
           Data := format('KILL PLAYER %d' + LineEnding, [i]);
-          Client.Write(Data[1], Length(Data));
+          Client.SendMessage(Data);
         end else begin
           Players[i].Paint;
         end;
@@ -135,7 +146,7 @@ begin
         if MyPlayer.Mange(Miettes[i]) then begin
             Miettes[i] := nil;
             Data := format('KILL MIETTE %d' + LineEnding, [i]);
-            Client.Write(Data[1], Length(Data));
+            Client.SendMessage(Data);
         end else begin
           Miettes[i].Paint;
         end;
@@ -151,27 +162,24 @@ begin
     MyPlayer.Reconstitue;
     IsReconstitue := False;
   end;
-  if Client.CanWrite(6000) then with MyPlayer, Position do begin
+  with MyPlayer, Position do begin
     Data := format('UPDATE %d %d %d %.15f', [MyIndex, X, Y, FTaille]);
     for i := 2 to MyPlayer.numberboule do with MyPlayer, Boule[i] do begin
       Data += format(' %d %d %d %.15f', [i, X, Y, ATaille]);
     end;
     Data += LineEnding;
-    Client.Write(Data[1], Length(Data));
+    Client.SendMessage(Data);
   end;
 end;
 
 procedure TForm1.StartGame(Sender: TObject);
 begin
   Randomize;
-  Client := TTcpIpClientSocket.Create(ServerName, ServerPort);
-  Data := 'JOIN';
-  Client.Write(Data[1], Length(Data));
-  if Client.CanRead(60000) then begin
-    DataSize := Client.Waiting;
-    SetLength(Data, DataSize);
-    Client.Read(Data[1], DataSize);
-    UpdatePlayer(Data, MyIndex);
+  with Client do begin
+    Host := ServerName;
+    Port := ServerPort;
+    if Connect then begin
+    end;
   end;
 end;
 
@@ -191,6 +199,13 @@ begin
       IsBalance := True;
       IdleTimer2.Enabled := True;
     end;
+  end;
+end;
+
+procedure TForm1.ClientConnect(aSocket: TLSocket);
+begin
+  with aSocket do begin
+    SendMessage('JOIN');
   end;
 end;
 

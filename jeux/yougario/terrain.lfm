@@ -31,4 +31,13 @@ object Form1: TForm1
     Left = 80
     Top = 12
   end
+  object Client: TLTCPComponent
+    Port = 0
+    OnReceive = ClientReceive
+    OnConnect = ClientConnect
+    Timeout = 0
+    ReuseAddress = False
+    Left = 40
+    Top = 116
+  end
 end
